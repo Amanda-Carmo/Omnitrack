@@ -29,12 +29,12 @@ def eye_contour(img, re_coord, le_coord):
     cv.fillPoly(mask, [np.array(le_coord, dtype=np.int32)], 255)
 
     # showing the mask 
-    cv.imshow('mask', mask)
+    # cv.imshow('mask', mask)
 
     # draw eyes image on mask, where white shape is 
     eyes = cv.bitwise_and(rgb_frame, rgb_frame, mask=mask)
     # change black color to gray other than eys 
-    cv.imshow('eyes draw', eyes)
+    # cv.imshow('eyes draw', eyes)
     eyes[mask==0]=155
     
     # getting minium and maximum x and y  for right and left eyes 

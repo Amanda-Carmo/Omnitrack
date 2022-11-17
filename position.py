@@ -3,7 +3,6 @@
 
 import cv2 as cv
 import numpy as np
-import math
 
 # colors 
 # values =(blue, green, red) opencv accepts BGR values not RGB
@@ -19,8 +18,14 @@ PINK = (147,20,255)
 def pixel_count(f_piece, s_piece, t_piece):
     # counting black pixel in each part 
     right_part = np.sum(f_piece==0)
+    # print(right_part)
+
     center_part = np.sum(s_piece==0)
+    # print(center_part)
+
     left_part = np.sum(t_piece==0)
+    # print(left_part)
+
     # creating list of these values
     eye_parts = [right_part, center_part, left_part]
 
@@ -48,6 +53,9 @@ def pixel_count(f_piece, s_piece, t_piece):
 def position(eye_mask):
     # get the height and width of the eye
     h, w, z = eye_mask.shape
+    print(h)
+    print(w)
+    # print("--------------------------------------------")
 
     # remove noise from eye image
     gaussian_blur = cv.GaussianBlur(eye_mask, (9,9),0)
@@ -55,6 +63,8 @@ def position(eye_mask):
 
     # threshold to convert binary image
     ret, threshed_eye = cv.threshold(median_blur, 130, 255, cv.THRESH_BINARY)
+    print(f'\n{threshed_eye}\n')
+    print("=======================")
 
     # create fixd part for eye with 
     piece = int(w/3) 
