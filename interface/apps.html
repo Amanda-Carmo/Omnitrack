@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <button onclick="location.href = 'https://www.netflix.com';" type="submit" class="btn btn1_app" onclick="openPopup()"><img src="Netflix_2015_logo.svg.png" alt=""></button>
+        <button onclick="location.href = 'https://www.youtube.com';" type="submit" class="btn btn2_app" onclick="openPopup()"><img src="YouTube_Logo_2017.svg.png" alt=""></button>
+        <button onclick="location.href = 'https://www.google.com';" type="submit" class="btn btn3_app" onclick="openPopup()"><img src="134-1340245_chrome-png-image-google-chrome-browser-logo-transparent.png" alt=""></button>
+        <button onclick="location.href = 'https://www.bbc.com/news';" type="submit" class="btn btn4_app" onclick="openPopup()"><img src="Screen Shot 2022-11-16 at 23.07.50.png" alt=""></button>
+
+        <!-- <button onclick="location.href = 'www.yoursite.com';" id="myButton" class="float-left submit-button" >Home</button> -->
+
+        <div class="popup" id="popup">
+            <h2>Mensagem enviada!</h2>
+            <button type="button" onclick="closePopup()">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        let popup = document.getElementById("popup");
+
+        function openPopup() {
+            popup.classList.add("open-popup")
+        }
+        function closePopup() {
+            popup.classList.remove("open-popup")
+        }
+
+    </script>
+
+</body>
+
+</html>

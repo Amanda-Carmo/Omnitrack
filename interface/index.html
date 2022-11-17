@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <button type="submit" class="btn btn1" onclick="openPopup()">Chamar cuidador</button>
+        
+        <button type="submit" class="btn btn2" onclick="openPopup()">Mensagem 2</button>
+        <button type="submit" class="btn btn3" onclick="openPopup()">Mensagem 3</button>
+        <button type="submit" class="btn btn4" onclick="openPopup()">Mensagem 4</button>
+        <div class="popup" id="popup">
+            <h2>Mensagem enviada!</h2>
+            <button type="button" onclick="closePopup()">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        let popup = document.getElementById("popup");
+
+        function openPopup() {
+            popup.classList.add("open-popup")
+        }
+        function closePopup() {
+            popup.classList.remove("open-popup")
+        }
+
+    </script>
+
+</body>
+
+</html>
