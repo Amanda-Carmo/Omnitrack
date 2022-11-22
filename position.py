@@ -53,8 +53,8 @@ def pixel_count(f_piece, s_piece, t_piece):
 def position(eye_mask):
     # get the height and width of the eye
     h, w, z = eye_mask.shape
-    print(h)
-    print(w)
+    # print(h)
+    # print(w)
     # print("--------------------------------------------")
 
     # remove noise from eye image
@@ -63,8 +63,9 @@ def position(eye_mask):
 
     # threshold to convert binary image
     ret, threshed_eye = cv.threshold(median_blur, 130, 255, cv.THRESH_BINARY)
-    print(f'\n{threshed_eye}\n')
-    print("=======================")
+    cv.imshow('a', threshed_eye)
+    # print(f'\n{threshed_eye}\n')
+    # print("=======================")
 
     # create fixd part for eye with 
     piece = int(w/3) 
