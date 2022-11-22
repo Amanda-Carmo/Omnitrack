@@ -17,19 +17,20 @@ PINK = (147,20,255)
 # Pixel counter
 def pixel_count(f_piece, s_piece, t_piece):
     # counting black pixel in each part 
-    right_part = np.sum(f_piece==0)
+    right_part = np.sum(f_piece<50)
     # print(right_part)
 
-    center_part = np.sum(s_piece==0)
+    center_part = np.sum(s_piece<50)
     # print(center_part)
 
-    left_part = np.sum(t_piece==0)
+    left_part = np.sum(t_piece<50)
     # print(left_part)
 
     # creating list of these values
     eye_parts = [right_part, center_part, left_part]
 
     # getting the index of max values in the list 
+    #print(eye_parts)
     max_index = eye_parts.index(max(eye_parts))
     pos_eye ='' 
     
@@ -49,12 +50,11 @@ def pixel_count(f_piece, s_piece, t_piece):
     
     return pos_eye, color
 
-
 def position(eye_mask):
     # get the height and width of the eye
     h, w, z = eye_mask.shape
-    print(h)
-    print(w)
+    #print(h)
+    #print(w)
     # print("--------------------------------------------")
 
     # remove noise from eye image
@@ -62,9 +62,9 @@ def position(eye_mask):
     median_blur = cv.medianBlur(gaussian_blur, 3)
 
     # threshold to convert binary image
-    ret, threshed_eye = cv.threshold(median_blur, 130, 255, cv.THRESH_BINARY)
-    print(f'\n{threshed_eye}\n')
-    print("=======================")
+    ret, threshed_eye = cv.threshold(median_blur, 40, 240, cv.THRESH_BINARY)
+    #print(f'\n{threshed_eye}\n')
+    #print("=======================")
 
     # create fixd part for eye with 
     piece = int(w/3) 

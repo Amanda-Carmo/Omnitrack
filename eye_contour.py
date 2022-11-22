@@ -44,11 +44,20 @@ def eye_contour(img, re_coord, le_coord):
     r_max_y = (max(re_coord, key=lambda item : item[1]))[1]
     r_min_y = (min(re_coord, key=lambda item: item[1]))[1]
 
+    r_med_x = abs(r_min_x + (r_max_x - r_min_x)/2)
+    r_med_y = abs(r_min_y + (r_max_y - r_min_y)/2
+)
     # For LEFT Eye
     l_max_x = (max(le_coord, key=lambda item: item[0]))[0]
     l_min_x = (min(le_coord, key=lambda item: item[0]))[0]
     l_max_y = (max(le_coord, key=lambda item : item[1]))[1]
     l_min_y = (min(le_coord, key=lambda item: item[1]))[1]
+
+    l_med_x = abs(l_min_x + (l_max_x - l_min_x)/2)
+    l_med_y = abs(l_min_y + (l_max_y - l_min_y)/2)
+
+    l_med = (l_med_x, l_med_y)
+    r_med = (r_med_x, r_med_y)
 
     # croping the eyes from mask 
     cropped_right = eyes[r_min_y: r_max_y, r_min_x: r_max_x]
