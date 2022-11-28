@@ -9,6 +9,7 @@ import utils
 import webbrowser
 from blink import blinkRatio
 import pyautogui
+import gradio as gr
 
 # from interface import build_interface
 import os
@@ -27,7 +28,11 @@ url_netflix = 'https://www.netflix.com/browse'
 url_spotify = 'https://open.spotify.com'
 
 global global_var
-global_var = 0
+global a
+
+a = False
+
+global_var = None
 
 # Colors to use (maybe use from another file)
 GREEN = (0,255,0)
@@ -53,27 +58,35 @@ TOTAL_BLINKS = 0
 CLOSED_EYES_FRAME =  15 # need to be closed during 5 frames
 OPEN = False
 
-
-
-selected = option_menu(
-    
-    menu_title = None,
-    options = ['Home', 'Apps', 'Messages'],
-    icons = ['home', 'apps', 'message'],
-    menu_icon = 'menu',
-    default_index = 0,
+selected = option_menu( 
+    menu_title = 'Menu',
+    options = ['Apps', 'Home', 'Messages'],
+    icons = ['cast', 'house', 'list-task'],
+    menu_icon = 'cast',
+    default_index = 1,
     orientation = 'horizontal',
 )
 
-if selected == 'Apps':
-    global_var = 1
+if selected == 'Home':
+    st.title('Home')
+    st.write('This is your Omnitrack app! \n',  '\n look right to open messages, look left to open apps')
+    global_var = 'Home'
+
+elif selected == 'Apps':
+    st.title('Apps')
+    st.write('Apps page')
+    global_var = 'Apps'
+
+elif selected == 'Messages':
+    st.title('Messages')
+    st.write('Messages page')
+    global_var = 'Messages'
 
 
-if selected == 'Messages':
-    # st.experimental_rerun()
-    global_var = 2
-    
-
+st.title("Webcam Live Feed")
+run = st.checkbox('Run')
+FRAME_WINDOW = st.image([])
+# camera = cv.VideoCapture(0)
 
 #================================================ main =================================================
 cap = cv.VideoCapture(0)
@@ -84,12 +97,13 @@ with mp_face_mesh.FaceMesh(
     min_tracking_confidence=0.5
 ) as face_mesh:
 
-    while True:
+    while run:
         
         ret, frame = cap.read()
         if not ret:
             break
         frame = cv.flip(frame, 1)
+        
         # frame = cv.resize(frame, None, fx=1, fy=1, interpolation=cv.INTER_CUBIC)
 
         rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
@@ -103,10 +117,10 @@ with mp_face_mesh.FaceMesh(
             mesh_points=np.array([np.multiply([p.x, p.y], [img_w, img_h]).astype(int) 
             for p in results.multi_face_landmarks[0].landmark])
 
-            mesh_coords = landmarksDetection(frame, results, False)
+            mesh_coords = landmarksDetection(rgb_frame, results, False)
             
-            cv.polylines(frame, [mesh_points[LEFT_IRIS]], True, (0,255,0), 1, cv.LINE_AA)
-            cv.polylines(frame, [mesh_points[RIGHT_IRIS]], True, (0,255,0), 1, cv.LINE_AA)
+            cv.polylines(rgb_frame, [mesh_points[LEFT_IRIS]], True, (0,255,0), 1, cv.LINE_AA)
+            cv.polylines(rgb_frame, [mesh_points[RIGHT_IRIS]], True, (0,255,0), 1, cv.LINE_AA)
             
             (l_cx, l_cy), l_radius = cv.minEnclosingCircle(mesh_points[LEFT_IRIS])
             (r_cx, r_cy), r_radius = cv.minEnclosingCircle(mesh_points[RIGHT_IRIS])
@@ -114,11 +128,11 @@ with mp_face_mesh.FaceMesh(
             center_left = np.array([l_cx, l_cy], dtype=np.int32)
             center_right = np.array([r_cx, r_cy], dtype=np.int32)
 
-            cv.circle(frame, center_left, int(l_radius), (180,240,10), 1, cv.LINE_AA)
-            cv.circle(frame, center_right, int(r_radius), (245,170,20), 1, cv.LINE_AA)
+            cv.circle(rgb_frame, center_left, int(l_radius), (180,240,10), 1, cv.LINE_AA)
+            cv.circle(rgb_frame, center_right, int(r_radius), (245,170,20), 1, cv.LINE_AA)
 
-            cv.circle(frame, center_left, 1, (255,0,0), -1, cv.LINE_AA)
-            cv.circle(frame, center_right, 1, (255,0,0), -1, cv.LINE_AA)
+            cv.circle(rgb_frame, center_left, 1, (255,0,0), -1, cv.LINE_AA)
+            cv.circle(rgb_frame, center_right, 1, (255,0,0), -1, cv.LINE_AA)
 
             # drawing on the mask 
             cv.circle(mask, center_left, int(l_radius), (255,255,255), -1, cv.LINE_AA)
@@ -128,12 +142,12 @@ with mp_face_mesh.FaceMesh(
             # Contour 
 
             # Mask
-            cv.polylines(frame,  [np.array([mesh_coords[p] for p in LEFT_EYE ], dtype=np.int32)], True, BLUE, 1, cv.LINE_AA)
-            cv.polylines(frame,  [np.array([mesh_coords[p] for p in RIGHT_EYE ], dtype=np.int32)], True, BLUE, 1, cv.LINE_AA)
+            cv.polylines(rgb_frame,  [np.array([mesh_coords[p] for p in LEFT_EYE ], dtype=np.int32)], True, BLUE, 1, cv.LINE_AA)
+            cv.polylines(rgb_frame,  [np.array([mesh_coords[p] for p in RIGHT_EYE ], dtype=np.int32)], True, BLUE, 1, cv.LINE_AA)
             
             left_coords = [mesh_coords[p] for p in LEFT_EYE]
             right_coords = [mesh_coords[p] for p in RIGHT_EYE]
-            crop_right, crop_left = eye_contour(frame, right_coords, left_coords)
+            crop_right, crop_left = eye_contour(rgb_frame, right_coords, left_coords)
             
             # cv.imshow('left', crop_left)
             # cv.imshow('right', crop_right)
@@ -144,21 +158,22 @@ with mp_face_mesh.FaceMesh(
             # Position
             # print(crop_left.shape)
             eye_position_right, color = position(crop_right)
-            utils.colorBackgroundText(frame, f'R: {eye_position_right}', FONTS, 1.0, (40, 220), 2, color[0], color[1], 8, 8)
+            utils.colorBackgroundText(rgb_frame, f'R: {eye_position_right}', FONTS, 1.0, (40, 220), 2, color[0], color[1], 8, 8)
             eye_position_left, color = position(crop_left)
-            utils.colorBackgroundText(frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
+            utils.colorBackgroundText(rgb_frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
             
             
             # -----------------------------------------------------------------------------------
             # Blink detection
 
-            ratio = blinkRatio(frame, mesh_coords, RIGHT_EYE, LEFT_EYE)
-            utils.colorBackgroundText(frame,  f'Ratio : {round(ratio,2)}', FONTS, 0.7, (30,100),2, PINK, YELLOW)
+            ratio = blinkRatio(rgb_frame, mesh_coords, RIGHT_EYE, LEFT_EYE)
+            utils.colorBackgroundText(rgb_frame,  f'Ratio : {round(ratio,2)}', FONTS, 0.7, (30,100),2, PINK, YELLOW)
             
+
             if ratio > 5.5:
                 CEF_COUNTER += 1
                 # cv.putText(frame, 'Blink', (200, 50), FONTS, 1.3, utils.PINK, 2)
-                utils.colorBackgroundText(frame,  f'Blink', FONTS, 1.7, (int(img_h/2), 100), 2, YELLOW, pad_x=6, pad_y=6, )
+                utils.colorBackgroundText(rgb_frame,  f'Blink', FONTS, 1.7, (int(img_h/2), 100), 2, YELLOW, pad_x=6, pad_y=6, )
 
             else:
                 if CEF_COUNTER > CLOSED_EYES_FRAME:
@@ -167,53 +182,13 @@ with mp_face_mesh.FaceMesh(
                     
                     if TOTAL_BLINKS == 3 and OPEN == False:
                         
-                        # dirname = os.path.dirname(__file__)
-                        # filename = os.path.join(dirname, 'interface.py')
+                        # demo.launch()
 
-                        # _config.set_option("server.headless", True)
-                        # args = []
+                        # if global_var == 'Home':
+                        #     st.write("a")
 
-                        # #streamlit.cli.main_run(filename, args)
-                        # streamlit.bootstrap.run(filename,'',args)
-                        # if __name__ == '__main__':
-                        #     sys.argv = ["streamlit", "run", "APP_NAME.py"]
-                        #     sys.exit(stcli.main())
-
-                        if global_var == 0:
-                            st.title("Omnitrack Interface")
-                            st.write("This is the interface for Omnitrack.")
-
-                        if global_var == 1:
-                            st.title("Your Apps")
-                            app1 = st.button("Netflix")
-                            app2 = st.button("Spotify")
-
-                            st.write(app1, app2)
-
-                            if app1:
-                                st.write("Openning Netflix...")
-                                webbrowser.get(chrome_path).open(url_netflix)
-
-                            if app2:
-                                st.write("Openning Spotify...")
-                                webbrowser.get(chrome_path).open(url_spotify)
-
-                        if global_var == 2:
-                            st.title("Choose a message")
-                            msg1 = st.button("Call caregiver")
-                            msg2 = st.button("Message caregiver")
-                            msg3 = st.button("Call doctor")
-
-                            st.write(msg1)
-                            st.write(msg2)
-                            st.write(msg3)
-
-                            if msg1:
-                                st.write("Calling caregiver...")
-                            if msg2:
-                                st.write("Messaging caregiver...")
-                            if msg3:
-                                st.write("Calling doctor...")
+                        # if global_var == 1:
+                        #     st.title('You selected messages')
                         
                         mouse_position = pyautogui.moveTo(578, 365)
                         # open_browser(url_2)
@@ -227,20 +202,14 @@ with mp_face_mesh.FaceMesh(
                         pyautogui.moveTo(1328, 338)
 
             # cv.putText(frame, f'Total Blinks: {TOTAL_BLINKS}', (100, 150), FONTS, 0.6, utils.GREEN, 2)
-            utils.colorBackgroundText(frame,  f'Total Blinks: {TOTAL_BLINKS}', FONTS, 0.7, (30,150),2)
+            utils.colorBackgroundText(rgb_frame,  f'Total Blinks: {TOTAL_BLINKS}', FONTS, 0.7, (30,150),2)
 
-
-            # open web page if right
-            # if eye_position_right == 'RIGHT':
-                # webbrowser.get(chrome_path).open(url)
-                # break
-
-
+        FRAME_WINDOW.image(rgb_frame, width=200)
         # cv.imshow('Mask_pupil', mask)     
-        cv.imshow('img', frame)
-        key = cv.waitKey(1)
-        if key == ord('q'): # off pressing "q"
-            break
+        # cv.imshow('img', frame)
+        # key = cv.waitKey(1)
+        # if key == ord('q'): # off pressing "q"
+        #     break
 
 cap.release()
-cv.destroyAllWindows()
+# cv.destroyAllWindows()
