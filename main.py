@@ -28,9 +28,7 @@ url_netflix = 'https://www.netflix.com/browse'
 url_spotify = 'https://open.spotify.com'
 
 global global_var
-global a
 
-a = False
 
 global_var = None
 
@@ -181,14 +179,8 @@ with mp_face_mesh.FaceMesh(
                     CEF_COUNTER = 0
                     
                     if TOTAL_BLINKS == 3 and OPEN == False:
-                        
-                        # demo.launch()
 
-                        # if global_var == 'Home':
-                        #     st.write("a")
 
-                        # if global_var == 1:
-                        #     st.title('You selected messages')
                         
                         mouse_position = pyautogui.moveTo(578, 365)
                         # open_browser(url_2)
