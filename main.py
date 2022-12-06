@@ -50,11 +50,14 @@ FONTS = cv.FONT_HERSHEY_COMPLEX
 
 CEF_COUNTER = 0
 TOTAL_BLINKS = 0
-CLOSED_EYES_FRAME =  15 # need to be closed during 15 frames
+CLOSED_EYES_FRAME =  25 # need to be closed during 15 frames
 OPEN = False
 
 LEFT_TIME = 5
 RIGHT_TIME = 5
+
+def open_browser(url):
+    webbrowser.get(chrome_path).open(url)
 
 selected = option_menu( # create a menu    
     menu_title = 'Menu',
@@ -75,14 +78,22 @@ if selected == 'Home':
 
 elif selected == 'Apps':
     st.title('Apps')
-    st.button('Netflix')
-    st.button('Spotify')    
+    if st.button('Netflix'):
+        open_browser(url_netflix)
+
+    if st.button('Spotify'):
+        open_browser(url_spotify)
     
 
 elif selected == 'Messages':
     st.title('Messages')
-
-
+    if st.button('Call caregiver'):
+        st.write('Calling caregiver...')
+    if st.button('Ask for help'):
+        st.write('Sending message...')
+    if st.button('Message 1 ........'):
+        st.write('Sending message...')
+    
 
 st.write("_Webcam Live Feed_")
 run = st.checkbox('Run', value=True)
@@ -99,9 +110,9 @@ with mp_face_mesh.FaceMesh(
 ) as face_mesh:
 
     while run:
-
-        
-        
+        count = 0
+        blink = False
+        click = False
         ret, frame = cap.read()
         if not ret:
             break
@@ -163,7 +174,7 @@ with mp_face_mesh.FaceMesh(
             ratio = blinkRatio(rgb_frame, mesh_coords, RIGHT_EYE, LEFT_EYE)
             utils.colorBackgroundText(rgb_frame,  f'Ratio : {round(ratio,2)}', FONTS, 0.7, (30,100),2, PINK, YELLOW)
             
-            blink = False
+            
 
             if ratio > 5.5:
                 
@@ -172,16 +183,32 @@ with mp_face_mesh.FaceMesh(
                 # cv.putText(frame, 'Blink', (200, 50), FONTS, 1.3, utils.PINK, 2)
                 utils.colorBackgroundText(rgb_frame,  f'Blink', FONTS, 1.7, (int(img_h/2), 100), 2, YELLOW, pad_x=6, pad_y=6, )
                 blink = True
+                
+                
 
             else:
-                if CEF_COUNTER > 30:
+                if CEF_COUNTER > 90:
                     pyautogui.moveTo(1002, 317)
                     pyautogui.click()
                     CEF_COUNTER = 0
 
+                
+                if CEF_COUNTER > 50 and CEF_COUNTER <= 80:
+                    if count == 0:
+                        pyautogui.moveTo(581, 524)
+
+                    if count == 1:
+                        pyautogui.moveTo(593, 524)
+
+
+
+
+
+
                 if CEF_COUNTER > CLOSED_EYES_FRAME:
                     TOTAL_BLINKS += 1
                     pyautogui.click()
+                    click = True
   
                     CEF_COUNTER = 0
                     
@@ -197,7 +224,7 @@ with mp_face_mesh.FaceMesh(
                     #     pyautogui.moveTo(1328, 338)
             
             # cv.putText(frame, f'Total Blinks: {TOTAL_BLINKS}', (100, 150), FONTS, 0.6, utils.GREEN, 2)
-            utils.colorBackgroundText(rgb_frame,  f'Total Blinks: {TOTAL_BLINKS}', FONTS, 0.7, (30,150),2)
+            # utils.colorBackgroundText(rgb_frame,  f'Total Blinks: {TOTAL_BLINKS}', FONTS, 0.7, (30,150),2)
             
             #-------------------------------------------------------------------------------------
             # Position
@@ -207,14 +234,35 @@ with mp_face_mesh.FaceMesh(
             eye_position_left, color = position(crop_left, blink)
             utils.colorBackgroundText(rgb_frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
 
-            if eye_position_right == 'LEFT' or eye_position_left == 'LEFT':
+            flag_right = False
+            flag_left = False
+
+            if eye_position_right == 'LEFT':
                 pyautogui.moveTo(1282, 317)
+                # pyautogui.click()
+                # pyautogui.moveTo(581, 524)
+                
+            # time.sleep(7)
+            # elif blink and CLOSED_EYES_FRAME > 35:
+                
+                
 
-            if eye_position_right == 'RIGHT' or eye_position_left == 'RIGHT':
-                pyautogui.moveTo(707, 317)
+            if eye_position_right == 'RIGHT':
+                pyautogui.moveTo(690, 310)
+                flag_right = True     
+                # pyautogui.click() 
+                # pyautogui.moveTo(637, 522)
 
-            
 
+            # time.sleep(7)
+            # if blink:
+            #     pyautogui.moveTo(637, 522)
+                
+            #     if blink:
+            #         pyautogui.moveTo(593, 585)
+                    
+            #         if blink:
+            #             pyautogui.moveTo(611, 649)
 
             #-------------------------------------------------------------------------------------
 

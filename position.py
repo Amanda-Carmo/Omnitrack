@@ -62,7 +62,7 @@ def position(eye_mask, blink):
     median_blur = cv.medianBlur(gaussian_blur, 3)
 
     # threshold to convert binary image
-    ret, threshed_eye = cv.threshold(median_blur, 40, 195, cv.THRESH_BINARY)
+    ret, threshed_eye = cv.threshold(median_blur, 40, 200, cv.THRESH_BINARY)
     #print(f'\n{threshed_eye}\n')
     #print("=======================")
 

@@ -23,3 +23,6 @@ def colorBackgroundText(img, text, font, fontScale, textPos, textThickness=1,tex
     cv.putText(img,text, textPos,font, fontScale, textColor,textThickness ) # draw in text
 
     return img
+
+
+    
