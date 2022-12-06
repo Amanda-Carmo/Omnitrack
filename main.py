@@ -10,6 +10,7 @@ import webbrowser
 from blink import blinkRatio
 import pyautogui
 import gradio as gr
+import time
 
 # from interface import build_interface
 import os
@@ -27,10 +28,6 @@ chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
 url_netflix = 'https://www.netflix.com/browse'
 url_spotify = 'https://open.spotify.com'
 
-global global_var
-
-
-global_var = None
 
 # Colors to use (maybe use from another file)
 GREEN = (0,255,0)
@@ -53,10 +50,13 @@ FONTS = cv.FONT_HERSHEY_COMPLEX
 
 CEF_COUNTER = 0
 TOTAL_BLINKS = 0
-CLOSED_EYES_FRAME =  15 # need to be closed during 5 frames
+CLOSED_EYES_FRAME =  15 # need to be closed during 15 frames
 OPEN = False
 
-selected = option_menu( 
+LEFT_TIME = 5
+RIGHT_TIME = 5
+
+selected = option_menu( # create a menu    
     menu_title = 'Menu',
     options = ['Apps', 'Home', 'Messages'],
     icons = ['cast', 'house', 'list-task'],
@@ -67,22 +67,25 @@ selected = option_menu(
 
 if selected == 'Home':
     st.title('Home')
-    st.write('This is your Omnitrack app! \n',  '\n look right to open messages, look left to open apps')
+    st.write('### This is your Omnitrack app! \n')
+    st.write('\n look **RIGHT** to open messages and **look LEFT** to open apps\n', 
+             '\nkeep your eyes **CLOSED** for a while to back to home page')
+
     global_var = 'Home'
 
 elif selected == 'Apps':
     st.title('Apps')
-    st.write('Apps page')
-    global_var = 'Apps'
+    st.button('Netflix')
+    st.button('Spotify')    
+    
 
 elif selected == 'Messages':
     st.title('Messages')
-    st.write('Messages page')
-    global_var = 'Messages'
 
 
-st.title("Webcam Live Feed")
-run = st.checkbox('Run')
+
+st.write("_Webcam Live Feed_")
+run = st.checkbox('Run', value=True)
 FRAME_WINDOW = st.image([])
 # camera = cv.VideoCapture(0)
 
@@ -96,6 +99,8 @@ with mp_face_mesh.FaceMesh(
 ) as face_mesh:
 
     while run:
+
+        
         
         ret, frame = cap.read()
         if not ret:
@@ -150,16 +155,7 @@ with mp_face_mesh.FaceMesh(
             # cv.imshow('left', crop_left)
             # cv.imshow('right', crop_right)
 
-            # print(crop_left.shape)
-
-            #-------------------------------------------------------------------------------------
-            # Position
-            # print(crop_left.shape)
-            eye_position_right, color = position(crop_right)
-            utils.colorBackgroundText(rgb_frame, f'R: {eye_position_right}', FONTS, 1.0, (40, 220), 2, color[0], color[1], 8, 8)
-            eye_position_left, color = position(crop_left)
-            utils.colorBackgroundText(rgb_frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
-            
+            # print(crop_left.shape)            
             
             # -----------------------------------------------------------------------------------
             # Blink detection
@@ -167,36 +163,64 @@ with mp_face_mesh.FaceMesh(
             ratio = blinkRatio(rgb_frame, mesh_coords, RIGHT_EYE, LEFT_EYE)
             utils.colorBackgroundText(rgb_frame,  f'Ratio : {round(ratio,2)}', FONTS, 0.7, (30,100),2, PINK, YELLOW)
             
+            blink = False
 
             if ratio > 5.5:
+                
                 CEF_COUNTER += 1
+
                 # cv.putText(frame, 'Blink', (200, 50), FONTS, 1.3, utils.PINK, 2)
                 utils.colorBackgroundText(rgb_frame,  f'Blink', FONTS, 1.7, (int(img_h/2), 100), 2, YELLOW, pad_x=6, pad_y=6, )
+                blink = True
 
             else:
+                if CEF_COUNTER > 30:
+                    pyautogui.moveTo(1002, 317)
+                    pyautogui.click()
+                    CEF_COUNTER = 0
+
                 if CEF_COUNTER > CLOSED_EYES_FRAME:
                     TOTAL_BLINKS += 1
+                    pyautogui.click()
+  
                     CEF_COUNTER = 0
                     
-                    if TOTAL_BLINKS == 3 and OPEN == False:
-
-
+                    # if TOTAL_BLINKS == 3 and OPEN == False:
                         
-                        mouse_position = pyautogui.moveTo(578, 365)
-                        # open_browser(url_2)
-                        TOTAL_BLINKS = 0
+                    #     mouse_position = pyautogui.moveTo(578, 365)
+                    #     # open_browser(url_2)
+                    #     TOTAL_BLINKS = 0
                     
-                        global_var = 0
-                        OPEN = True
                     
-                    #move to next button
-                    if CEF_COUNTER == 17:
-                        pyautogui.moveTo(1328, 338)
-
+                    # #move to next button
+                    # if CEF_COUNTER == 17:
+                    #     pyautogui.moveTo(1328, 338)
+            
             # cv.putText(frame, f'Total Blinks: {TOTAL_BLINKS}', (100, 150), FONTS, 0.6, utils.GREEN, 2)
             utils.colorBackgroundText(rgb_frame,  f'Total Blinks: {TOTAL_BLINKS}', FONTS, 0.7, (30,150),2)
+            
+            #-------------------------------------------------------------------------------------
+            # Position
+            # print(crop_left.shape)
+            eye_position_right, color = position(crop_right, blink)
+            utils.colorBackgroundText(rgb_frame, f'R: {eye_position_right}', FONTS, 1.0, (40, 220), 2, color[0], color[1], 8, 8)
+            eye_position_left, color = position(crop_left, blink)
+            utils.colorBackgroundText(rgb_frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
 
-        FRAME_WINDOW.image(rgb_frame, width=200)
+            if eye_position_right == 'LEFT' or eye_position_left == 'LEFT':
+                pyautogui.moveTo(1282, 317)
+
+            if eye_position_right == 'RIGHT' or eye_position_left == 'RIGHT':
+                pyautogui.moveTo(707, 317)
+
+            
+
+
+            #-------------------------------------------------------------------------------------
+
+
+
+        FRAME_WINDOW.image(rgb_frame, width=50)
         # cv.imshow('Mask_pupil', mask)     
         # cv.imshow('img', frame)
         # key = cv.waitKey(1)

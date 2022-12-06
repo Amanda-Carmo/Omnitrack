@@ -50,7 +50,7 @@ def pixel_count(f_piece, s_piece, t_piece):
     
     return pos_eye, color
 
-def position(eye_mask):
+def position(eye_mask, blink):
     # get the height and width of the eye
     h, w, z = eye_mask.shape
     #print(h)
@@ -62,7 +62,7 @@ def position(eye_mask):
     median_blur = cv.medianBlur(gaussian_blur, 3)
 
     # threshold to convert binary image
-    ret, threshed_eye = cv.threshold(median_blur, 40, 220, cv.THRESH_BINARY)
+    ret, threshed_eye = cv.threshold(median_blur, 40, 195, cv.THRESH_BINARY)
     #print(f'\n{threshed_eye}\n')
     #print("=======================")
 
@@ -74,8 +74,13 @@ def position(eye_mask):
     center_piece = threshed_eye[0:h, piece:(piece+piece)]
     left_piece = threshed_eye[0:h, (piece + piece):w]
     
-    # calling pixel counter function
-    eye_position, color = pixel_count(right_piece, center_piece, left_piece)
+    if blink == False:
+        # calling pixel counter function
+        eye_position, color = pixel_count(right_piece, center_piece, left_piece)
+
+    else:
+        eye_position = "Closed"
+        color = [GRAY, YELLOW]
     
     return eye_position, color
 
