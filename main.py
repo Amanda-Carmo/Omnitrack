@@ -268,7 +268,7 @@ with mp_face_mesh.FaceMesh(
 
 
 
-        FRAME_WINDOW.image(rgb_frame, width=50)
+        FRAME_WINDOW.image(rgb_frame, width=200)
         # cv.imshow('Mask_pupil', mask)     
         # cv.imshow('img', frame)
         # key = cv.waitKey(1)
